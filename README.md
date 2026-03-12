@@ -18,7 +18,7 @@ One option is to run the bash scripts along with the aic repo:
 Proceed with one of these options once step 1 is completed
 
 ### Option 1: Run the bash script
-1. To run the bash scripts use the README.md file [here](https://github.com/mattdamon1868/ai_industry_challenge_deep_dive/tree/main/bash/README.md)
+1. To run the bash scripts use the README.md [file](https://github.com/mattdamon1868/ai_industry_challenge_deep_dive/blob/main/bash/README.md)
 
 ### Option 2: Run in the terminal directly
 
