@@ -10,7 +10,7 @@ If your simulation is running super slow it is probably using the CPU to run the
 
 Check whether you have an nvidia-driver installed:
 
-```
+```bash
 user@host:~$ dpkg -l | grep nvidia-driver
 ```
 
@@ -18,14 +18,14 @@ If you don't see anything then you need to install a driver for the GPU
 
 Check what ubuntu drivers are available for your card
 
-```
+```bash
 user@host:~$ ubuntu-drivers devices
 ```
 This will list the drivers and make a recommendation, *however I personally wouldn't go with the recommendation instead select the most recent one, for me it was nvidia-driver-590*
 
 Install the driver of choice
 
-```
+```bash
 user@host:~$ sudo apt install nvidia-driver-590
 # once installed reboot the system
 user@host:~$ sudo reboot
@@ -33,7 +33,7 @@ user@host:~$ sudo reboot
 
 > [!NOTE]
 > If you get errors with installing the driver theres probably a conflict in packages so lets clean and retry
-> ```
+> ```bash
 > # fix any broken packages
 > $ sudo dpkg --configure -a
 > $ sudo apt --fix-broken install
@@ -49,7 +49,7 @@ user@host:~$ sudo reboot
 
 To confirm it is installed and working properly 
 
-```
+```bash
 user@host:~$ nvidia-smi 
 
 # OR
@@ -60,7 +60,7 @@ user@host:~$ glxinfo -B # needs the mesa-utils
 
 If still not showing the graphics card
 
-```
+```bash
 user@host:~$ sudo prime-select nvidia
 ```
 
@@ -75,7 +75,7 @@ In order for the simulation to use the GPU Secure boot needs to be **disabled**,
 > This exists to prevent malicious code from running during the boot process. There is a way to add the GPU to the secure boot list however if this is being run on your personal computer its not a major issue if you disable it. 
 
 *Check if the secure boot is on*
-```
+```bash
 user@host:~$ mokutil --sb-state
 ```
 
@@ -94,7 +94,7 @@ Pixi creates its own environment but is based off the users local system therefo
 
 If you have **Kilted** and you attempt to run the policy seen in the `getting_started.md` or in [README.md](https://github.com/mattdamon1868/ai_industry_challenge_deep_dive/blob/main/README.md) and nothing happens in the simulation then the local `.bashrc` could be interferring with the `pixi` environment. Therefore check out your `.bashrc` and if there is anything related to ROS comment it out
 
-```
+```bash
 # check whats in the file
 user@host:~$ cat .bashrc
 

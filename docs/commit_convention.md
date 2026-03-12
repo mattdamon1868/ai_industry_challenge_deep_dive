@@ -8,7 +8,7 @@ This document defines how we write commit messages on this project. Consistent c
 
 Every commit message follows this structure:
 
-```
+```bash
 <type>(<scope>): <short description>
 
 <optional body>
@@ -18,7 +18,7 @@ Every commit message follows this structure:
 
 **Example:**
 
-```
+```bash
 feat(policy): implement diffusion policy observation encoder
 
 Adds ResNet-18 visual encoder with shared weights across 3 wrist cameras.
@@ -87,21 +87,21 @@ The scope tells your teammates which part of the project changed. Use one of the
 
 ### Simple (no body needed)
 
-```
+```bash
 fix(control): clamp admittance stiffness to safety bounds
 ```
 
-```
+```bash
 docs: add git commit convention for the team
 ```
 
-```
+```bash
 chore: update requirements.txt with mujoco 3.1
 ```
 
 ### With Body (explaining why)
 
-```
+```bash
 fix(control): reduce max force threshold from 50N to 30N
 
 The aic_controller applies scoring penalties above 25N based on
@@ -109,7 +109,7 @@ scoring_tests.md. Our previous 50N limit was causing safety score
 deductions on every trial.
 ```
 
-```
+```bash
 feat(policy): add force/torque history to observation space
 
 Single-frame F/T readings are too noisy for reliable contact detection.
@@ -117,7 +117,7 @@ Adding a 10-step history buffer (1 second at 10Hz) lets the policy
 detect force trends rather than reacting to individual spikes.
 ```
 
-```
+```bash
 perf(policy): replace diffusion denoising with FAST token decoding
 
 Diffusion inference was ~200ms (5Hz) which missed our 10Hz target.
@@ -127,7 +127,7 @@ Accuracy is within 2% of diffusion baseline on our eval suite.
 
 ### Breaking Change (footer)
 
-```
+```bash
 refactor(aic): restructure policy interface to match aic_model v2
 
 The aic_model template was updated upstream to use a new callback
@@ -144,7 +144,7 @@ All existing policy subclasses must be updated.
 
 Copy this and keep it handy:
 
-```
+```bash
 feat(scope): add new capability
 fix(scope): fix a bug
 docs: update documentation
