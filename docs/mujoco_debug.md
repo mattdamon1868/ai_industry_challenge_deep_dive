@@ -166,5 +166,6 @@ user@host:~$ pixi shell
 
 ## Mujoco w/ ROS2 Control
 (update soon)
+I am still debugging some other aspects of the mujoco setup
 
 *Last update on 03.27.2026*
