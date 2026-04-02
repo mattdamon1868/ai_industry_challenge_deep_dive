@@ -22,7 +22,7 @@ user@aic_eval:~$ sudo apt install python3-toml
 The scene generation workflow discusses how to launch aic_bringup directly from the using ros2 launch as opposed to using the /entrypoint.sh container environment setup. 
 The launch file they want us to run generates an environment file *aic.sdf* which can be exported to a mujoco file or mjcf file. When you attempt to run the ros2 launch file you will notice that it won't work that because you need to build the environment using *colcon build*.
 
-> **NOTE:** Need to be running the aic container in order for this to work
+> *NOTE:* Need to be running the aic container in order for this to work
 
 1. Build the packages
 You will need to build all the required packages first try building the aic_bringup package and see what is missing you might get a message that gives you the following output:
@@ -91,7 +91,7 @@ user@aic_eval:~$ colcon build \
 
 Continue to do this until there are no more errors when running `colcon build --packages-select aic_bringup`
 
-> **NOTE:** When building the `aic_interfaces` package make sure to select the interfaces that are inside the package, `aic_control_interfaces` etc. 
+> *NOTE:* When building the `aic_interfaces` package make sure to select the interfaces that are inside the package, `aic_control_interfaces` etc. 
 
 2. Convert the SDF to MJCF
 > *Note:* Step 3 in the scene generation section
@@ -139,7 +139,7 @@ While also generating new files in order which will be used to run the mujoco si
 
 3. Organize MJCF files
 
-> **NOTE:** This is step 4 in the scene generation workflow
+> *NOTE:* This is step 4 in the scene generation workflow
 
 ```bash
 # always copy or symlink the generated mesh assets from the ~/aic_mujoco_world so mujoco can find the files
@@ -149,7 +149,7 @@ user@aic_eval:~$ colcon build --packages-seleect aic_mujoco
 ```
 
 4. Generate the final MJCF files and View in Mujoco
-> **NOTE:** This is step 5/6 in the scene generation workflow
+> *NOTE:* This is step 5/6 in the scene generation workflow
 
 ```bash
 # open a new terminal ctrl+alt+t
@@ -165,7 +165,72 @@ user@host:~$ pixi shell
 ```
 
 ## Mujoco w/ ROS2 Control
-(update soon)
-I am still debugging some other aspects of the mujoco setup
 
-*Last update on 03.27.2026*
+1. Install Dependencies
+*Step 1 in mujoco doc Part 2*
+
+When installing the dependencies I got a `404 Not Found` error output therefore I had to force the system to install and fix the missing packages without exiting. 
+
+```bash
+# 404 error
+404  Not Found [IP: 2600:3402:200:227::2 80]
+E: Failed to fetch http://packages.ros.org/ros2/ubuntu/pool/main/r/ros-kilted-ament-mypy/ros-kilted-ament-mypy_0.19.2-2noble.20260115.032537_amd64.deb  404  Not Found [IP: 2600:3402:200:227::2 80]
+# the sudo apt-get install -f -y command helps with fixing missing packages and resolves it without exiting the rosdep install 
+user@aic_eval:~$ rosdep install --from-paths src --ignore-src --rosdistro kilted -yr \
+  --skip-keys "gz-cmake3 DART libogre-dev libogre-next-2.3-dev ros-kilted-ament-cmake-clang-format ros-kilted-ament-mypy" \
+  --reinstall 2>/dev/null; sudo apt-get install -f -y
+```
+
+2. Build the Workspace
+I got an error that looked like:
+```bash
+Summary: 0 packages finished [1.32s]
+  1 package failed: aic_control_interfaces
+  7 packages aborted: aic_task_interfaces control_msgs controller_manager_msgs gz-cmake4 realtime_tools ros2_control_test_assets ros_gz_interfaces
+  5 packages had stderr output: aic_control_interfaces aic_task_interfaces control_msgs controller_manager_msgs ros_gz_interfaces
+  105 packages not processed
+```
+which has to do with the previous `build/` directory we did therefore lets remove it before re-building the workspace.
+
+```bash
+# a symlink error
+--- stderr: aic_control_interfaces                                 
+failed to create symbolic link '/home/dylan/ai_challenge_ws/ai_industry_challenge_deep_dive/ws_aic/build/aic_control_interfaces/ament_cmake_python/aic_control_interfaces/aic_control_interfaces' because existing path cannot be removed: Is a directory
+gmake[2]: *** [CMakeFiles/ament_cmake_python_symlink_aic_control_interfaces.dir/build.make:70: CMakeFiles/ament_cmake_python_symlink_aic_control_interfaces] Error 1
+gmake[1]: *** [CMakeFiles/Makefile2:452: CMakeFiles/ament_cmake_python_symlink_aic_control_interfaces.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+gmake: *** [Makefile:146: all] Error 2
+---
+```
+
+I also got an symlink error which can be avoided by simply removing the notation `--symlink-install` and while were at it remove `--merge-install` this might also cause an issue. Now re-run the build command and confirm it builds properly.
+
+```bash
+# remove the build package
+user@aic_eval:~$ rm -rf build/
+# rebuild the workspace with this updated command line
+user@aic_eval:~$ GZ_BUILD_FROM_SOURCE=1 colcon build \
+  --cmake-args -DCMAKE_BUILD_TYPE=Release \
+  --packages-ignore lerobot_robot_aic
+```
+> *NOTE:* These were the errors that I got when building the workspace with mujoco so if you have a different error please make sure to add it to this docu
+
+
+
+## Launching Mujoco with ros2_control
+I ran into an issue where the simulation would not run and this was due to the system running out of shared memory. Specifically the shared memory is failing with the `ZENOH_CONFIG_OVERRIDE` because there isn't enough `/dev/shm` space.
+We can fix this by simply changing the export command from *true* to *false*:
+> *NOTE:* This might decrease performance but will avoid the error.
+
+```bash
+# in terminal 2 inside the docker container
+user@aic_eval:~$ source ~/ai_challenge_ws/ai_industry_challenge_deep_dive/ws_aic/install/setup.bash
+user@aic_eval:~$ export RMW_IMPLEMENTATION=rmw_zenoh_cpp
+# changing the enabled from 'true' to 'false'
+user@aic_eval:~$ export ZENOH_CONFIG_OVERRIDE='transport/shared_memory/enabled=false'
+user@aic_eval:~$ ros2 run rmw_zenoh_cpp rmw_zenohd
+```
+
+Once this is done you can run teleoperations and move onto the example policies section.
+
+*Last update on 04.01.2026*
