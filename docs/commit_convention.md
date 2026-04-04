@@ -189,4 +189,24 @@ f0d5b8e feat(aic): implement first learned policy in aic_model
 
 ---
 
+## Merging a branch 
+When pulling the main from the github repo
+remember that it may give you some conflicting errors
+```bash
+# run this command when you are dealing with an merge error on the your local machine
+user@host:~$ git fetch origin
+# reset the origin
+user@host:~$ git reset --hard origin/main
+
+``` 
+
+## Git push branch
+When pushing the branch make sure to commit with the same convention described in the earlier sections and then you need to push to the repository with this command:
+```bash
+# after creating a git commit, push it to the repo
+user@host:~$ git push --set-upstream origin <branch_name>
+```
+
+If you want this to be done automatically without needing the `--set-upstream` command, you can edit the `git help config` script to enable automatic upstream tracking.
+
 *Add this file to your repo at `CONTRIBUTING.md` or `docs/commit_convention.md` so it's always accessible.*
