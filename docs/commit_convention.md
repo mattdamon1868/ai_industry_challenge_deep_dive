@@ -201,6 +201,15 @@ user@host:~$ git reset --hard origin/main
 ``` 
 
 ## Git push branch
+You will need to make sure you have authentication access to the repo. You need to be a collaborator and accept the email request. Once that happens you need to get the git command that will give you the access token
+```bash
+user@host:~$ gh auth status
+# it should return a failure since you don't have access yet
+user@host:~$ gh auth login
+# follow the steps to gain access and once complete try the status
+# command again, and you should see that you have an access token, now you can push the branch to the repo and create a pull request. 
+```
+
 When pushing the branch make sure to commit with the same convention described in the earlier sections and then you need to push to the repository with this command:
 ```bash
 # after creating a git commit, push it to the repo
