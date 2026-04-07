@@ -16,6 +16,28 @@ user@aic_eval:~$ sudo apt install python3-pip
 user@aic_eval:~$ pip3 install toml
 # OR
 user@aic_eval:~$ sudo apt install python3-toml
+
+# Before performing any of the Mujuco Simulation Setup and Debugging, We had to install these packages seperately before compiling the packages to run the AIC package for ROS2 Gazebo simulation to run properly:
+
+# Double check that your package list is updated:
+user@aic_eval:~$ sudo apt update
+
+# This is to install ros2 controls including: control_msgs and controller_manager_msgs 
+user@aic_eval:~$ sudo apt install ros-kilted-ros2-control ros-kilted-ros2-controllers
+
+# This is to setup ROS2 Joint State Publisher for publishing joint states and the transformations
+user@aic_eval:~$ sudo apt install ros-kilted-joint-state-publisher
+user@aic_eval:~$ sudo apt install ros-kilted-joint-state-publisher-gui
+
+# This is to install ROS2 Kilted GZ Plugin-Vendor for the APT package manager and the GZ 
+user@aic_eval:~$ sudo apt install ros-kilted-gz-plugin-vendor ros-kilted-gz-ros2-control
+
+# This is to install ROS2 Kilted Gazebo bridge package
+user@aic_eval:~$ sudo apt install ros-kilted-ros-gz-bridge
+
+# This is the install ROS2 Kilted UR Description Package 
+user@aic_eval:~$ sudo apt install ros-kilted-ur-description
+
 ```
 
 ## Scene Generation Debug
@@ -218,6 +240,34 @@ user@aic_eval:~$ GZ_BUILD_FROM_SOURCE=1 colcon build \
 
 
 ## Launching Mujoco with ros2_control
+
+
+# For Part 2 of the Mujoco with ROS 2 Control: 1. Installation Steps
+We ran into an issue on the Mujoco Ros2 Control Setup for the installing on rosdep command and before installing anything similar to sudo apt install, it needs an updated list of installation packages to recall from to integrate into the first step.
+```bash
+
+user@aic_eval:~$  cd ~/ws_aic
+## This is the extra step to update your tool to complete your system dependencies on the ROS2 packages before doing a rosdep install
+user@aic_eval:~$ rosdep update # Added step
+user@aic_eval:~$  rosdep install --from-paths src --ignore-src --rosdistro kilted -yr --skip-keys "gz-cmake3 DART libogre-dev libogre-next-2.3-dev"
+```
+
+We also ran into the issue that the colcon build command for the final step in "Building the Workspace" will have issues with the current build folder from previous installations. So how we got around it was by deleting it and restarting the build from colcon from scratch. Side Note: 
+
+We also removed --merge-install and --symlink-install options from the colcon building the aic_mujoco package. These brought up flags and issues when compiling the package. They worked without those given conditions.
+# 2. Build the Workspace
+```bash
+user@aic_eval:~$ cd ~/ws_aic
+user@aic_eval:~/ws_aic$ source /opt/ros/kilted/setup.bash
+
+# This is the step that we found through troubleshooting, Run this before compiling ()
+user@aic_eval:~/ws_aic$ rm -rf build # added Step
+
+# Build all packages (including aic_mujoco)
+user@aic_eval:~/ws_aic$ GZ_BUILD_FROM_SOURCE=1 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-ignore lerobot_robot_aic # modified version
+```
+
+
 I ran into an issue where the simulation would not run and this was due to the system running out of shared memory. Specifically the shared memory is failing with the `ZENOH_CONFIG_OVERRIDE` because there isn't enough `/dev/shm` space.
 We can fix this by simply changing the export command from *true* to *false*:
 > *NOTE:* This might decrease performance but will avoid the error.
@@ -231,6 +281,21 @@ user@aic_eval:~$ export ZENOH_CONFIG_OVERRIDE='transport/shared_memory/enabled=f
 user@aic_eval:~$ ros2 run rmw_zenoh_cpp rmw_zenohd
 ```
 
+
+We also ran into issues with the Teleoperation package step for the Launching the Mujoco with ROS2 controls final step: You need to run this on the Pixi shell. So we added the final debug steps for this which were to go into the pixi shell then go back to the workspace for the challenge and then to source install your setup.bash file and then go into it and then run the ros2 command to initiate the teleoperation. 
+
+
+To reiterate you need to have both: "ros2 launch aic_mujoco aic_mujoco_bringup.launch.py" and the "ros2 run rmw_zenoh_cpp rmw_zenohd" active
+
+```bash
+user@aic_eval:~$ cd ~/ws_aic/src/aic # to access the pixi.toml file
+user@aic_eval:~$ pixi shell # Added step needs to be on pixi shell for this
+(aic) user@aic_eval:~$ source ~/ws_aic/install/setup.bash
+(aic) user@aic_eval:~$ ros2 run aic_teleoperation cartesian_keyboard_teleop
+
+
+```
+
 Once this is done you can run teleoperations and move onto the example policies section.
 
-*Last update on 04.01.2026*
+*Last update on 04.04.2026*
