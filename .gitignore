@@ -57,3 +57,12 @@ toolbox/
 # ignore zipped files or gz files
 */gz
 *./tar.gz
+
+# ignore the aic workspace
+ws_aic/
+
+# ignore certain files in the deep dive policy node
+ai_industry_challenge_deep_dive/deep_dive_policy_node/deep_dive_policy_node/test.py
+ai_industry_challenge_deep_dive/deep_dive_policy_node/deep_dive_policy_node/test_load_policy.py
+ai_industry_challenge_deep_dive/deep_dive_policy_node/deep_dive_policy_node/test_policy.py
+ai_industry_challenge_deep_dive/deep_dive_policy_node/deep_dive_policy_node/WaveArm.py
