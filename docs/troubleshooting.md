@@ -109,7 +109,7 @@ export TURTLEBOT3_MODEL=burger
 
 user@host:~$ nano .bashrc
 #OR
-user@host:~$
+user@host:~$ gedit .bashrc
 
 ```
 
