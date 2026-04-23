@@ -19,66 +19,69 @@ user@aic_eval:~$ sudo apt install python3-toml
 ```
 
 ## Scene Generation Debug
+
 The scene generation workflow discusses how to launch aic_bringup directly from the using ros2 launch as opposed to using the /entrypoint.sh container environment setup. 
-The launch file they want us to run generates an environment file *aic.sdf* which can be exported to a mujoco file or mjcf file. When you attempt to run the ros2 launch file you will notice that it won't work that because you need to build the environment using *colcon build*.
+The launch file they want us to run generates an environment file *aic.sdf* which can be exported to a mujoco file or mjcf file. When you attempt to run the ros2 launch file you will notice that it won't work that` because you need to build the environment using *colcon build*.
 
 > *NOTE:* Need to be running the aic container in order for this to work
 
 1. Build the packages
+
 You will need to build all the required packages first try building the aic_bringup package and see what is missing you might get a message that gives you the following output:
 
   Check that the following packages have been built:
-  - aic_assets
-  - control_msgs
-  - controller_manager_msgs
-  - joint_state_publisher
-  - ros2_control_test_assets
-  - ros_gz_interfaces
-  - aic_scoring
-  - joint_limits
-  - joint_state_publisher_gui
-  - kinematics_interface
-  - aic_engine
-  - gz_plugin_vendor
-  - hardware_interface
-  - kinematics_interface_kdl
-  - ur_description
-  - controller_interface
-  - gz_common_vendor
-  - gz_msgs_vendor
-  - hardware_interface_testing
-  - aic_controller
-  - controller_manager
-  - gz_fuel_tools_vendor
-  - gz_physics_vendor
-  - gz_rendering_vendor
-  - gz_transport_vendor
-  - gz_gui_vendor
-  - gz_sensors_vendor
-  - ros_gz_bridge
-  - gz_sim_vendor
-  - aic_gazebo
-  - ros_gz_sim
-  - aic_description
+
+- aic_assets
+- control_msgs
+- controller_manager_msgs
+- joint_state_publisher
+- ros2_control_test_assets
+- ros_gz_interfaces
+- aic_scoring
+- joint_limits
+- joint_state_publisher_gui
+- kinematics_interface
+- aic_engine
+- gz_plugin_vendor
+- hardware_interface
+- kinematics_interface_kdl
+- ur_description
+- controller_interface
+- gz_common_vendor
+- gz_msgs_vendor
+- hardware_interface_testing
+- aic_controller
+- controller_manager
+- gz_fuel_tools_vendor
+- gz_physics_vendor
+- gz_rendering_vendor
+- gz_transport_vendor
+- gz_gui_vendor
+- gz_sensors_vendor
+- ros_gz_bridge
+- gz_sim_vendor
+- aic_gazebo
+- ros_gz_sim
+- aic_description
 
 All these packages need to be installed therefore start going one by one
 
 ```bash
-user@aic_eval:~$colcon build --packages-select <package_name>
+user@aic_eval:~$ colcon build --packages-select <package_name>
 ```
 
 If you run into issues with any of the packages not building properly it is likely due to another package requirement for the one you are installing for example with *aic_gazebo* you need these packages:
 
-  - gz_plugin_vendor
-  - gz_common_vendor
-  - gz_msgs_vendor
-  - gz_fuel_tools_vendor
-  - gz_physics_vendor
-  - gz_rendering_vendor
-  - gz_transport_vendor
-  - gz_gui_vendor
-  - gz_sensors_vendor
-  - gz_sim_vendor
+- gz_plugin_vendor
+- gz_common_vendor
+- gz_msgs_vendor
+- gz_fuel_tools_vendor
+- gz_physics_vendor
+- gz_rendering_vendor
+- gz_transport_vendor
+- gz_gui_vendor
+- gz_sensors_vendor
+- gz_sim_vendor
 
 You can either install each of them individully as before **OR** you can use the `--packages-up-to` command in `colcon build` which will install all the required packages up to the package selected (`<package_name>`).
 
@@ -93,7 +96,8 @@ Continue to do this until there are no more errors when running `colcon build --
 
 > *NOTE:* When building the `aic_interfaces` package make sure to select the interfaces that are inside the package, `aic_control_interfaces` etc. 
 
-2. Convert the SDF to MJCF
+1. Convert the SDF to MJCF
+
 > *Note:* Step 3 in the scene generation section
 
 Converting the sdf to an mjcf file, which is a file that mujoco can interpret to run the mujoco environment.
@@ -137,7 +141,7 @@ user@aic_eval:~$ python3 /home/dylan/ai_challenge_ws/ai_industry_challenge_deep_
 It should transfer the `aic.sdf` to an mjcf file which will be locatedin the aic_mujoco_world directory as specified.
 While also generating new files in order which will be used to run the mujoco simulation.
 
-3. Organize MJCF files
+1. Organize MJCF files
 
 > *NOTE:* This is step 4 in the scene generation workflow
 
@@ -148,7 +152,8 @@ user@aic_eval:~$ cp -r ~/ai_challenge_ws/ai_industry_challenge_deep_dive/aic_muj
 user@aic_eval:~$ colcon build --packages-seleect aic_mujoco
 ```
 
-4. Generate the final MJCF files and View in Mujoco
+1. Generate the final MJCF files and View in Mujoco
+
 > *NOTE:* This is step 5/6 in the scene generation workflow
 
 ```bash
@@ -167,6 +172,7 @@ user@host:~$ pixi shell
 ## Mujoco w/ ROS2 Control
 
 1. Install Dependencies
+
 *Step 1 in mujoco doc Part 2*
 
 When installing the dependencies I got a `404 Not Found` error output therefore I had to force the system to install and fix the missing packages without exiting. 
@@ -181,8 +187,10 @@ user@aic_eval:~$ rosdep install --from-paths src --ignore-src --rosdistro kilted
   --reinstall 2>/dev/null; sudo apt-get install -f -y
 ```
 
-2. Build the Workspace
+1. Build the Workspace
+
 I got an error that looked like:
+
 ```bash
 Summary: 0 packages finished [1.32s]
   1 package failed: aic_control_interfaces
@@ -190,6 +198,7 @@ Summary: 0 packages finished [1.32s]
   5 packages had stderr output: aic_control_interfaces aic_task_interfaces control_msgs controller_manager_msgs ros_gz_interfaces
   105 packages not processed
 ```
+
 which has to do with the previous `build/` directory we did therefore lets remove it before re-building the workspace.
 
 ```bash
@@ -213,13 +222,14 @@ user@aic_eval:~$ GZ_BUILD_FROM_SOURCE=1 colcon build \
   --cmake-args -DCMAKE_BUILD_TYPE=Release \
   --packages-ignore lerobot_robot_aic
 ```
+
 > *NOTE:* These were the errors that I got when building the workspace with mujoco so if you have a different error please make sure to add it to this docu
 
-
-
 ## Launching Mujoco with ros2_control
+
 I ran into an issue where the simulation would not run and this was due to the system running out of shared memory. Specifically the shared memory is failing with the `ZENOH_CONFIG_OVERRIDE` because there isn't enough `/dev/shm` space.
 We can fix this by simply changing the export command from *true* to *false*:
+
 > *NOTE:* This might decrease performance but will avoid the error.
 
 ```bash
